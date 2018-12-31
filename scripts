@@ -1,0 +1,5 @@
+<script src="https://unpkg.com/kontra@4.0.0/dist/core.js"></script>
+<script src="https://unpkg.com/kontra@4.0.0/dist/sprite.js"></script>
+<script src="https://unpkg.com/kontra@4.0.0/dist/gameLoop.js"></script>
+<script src="https://unpkg.com/kontra@4.0.0/dist/pointer.js"></script>
+<script src="https://unpkg.com/kontra@4.0.0/dist/keyboard.js"></script>
