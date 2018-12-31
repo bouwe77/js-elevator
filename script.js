@@ -1,10 +1,15 @@
-kontra.init();
-kontra.canvas.width = 20;
-kontra.canvas.height = 80;
-
 // === Config ===
 // The number of pixels to move the sprite up/down every frame
 var speed = 0.2;
+var canvasWidth = 20;
+var canvasHeight = 80;
+var numberOfFloors = 3;
+var carWidth = 20;
+var carHeight = 20;
+
+kontra.init();
+kontra.canvas.width = canvasWidth;
+kontra.canvas.height = canvasHeight;
 
 // === State ===
 var currentFloor = 0;
@@ -13,10 +18,10 @@ var stopAtFloor = -3;
 
 var sprite = kontra.sprite({
   x: 0,
-  y: 60,
+  y: numberOfFloors * carHeight,
   color: 'white',
-  width: 20,
-  height: 20,
+  width: carWidth,
+  height: carHeight,
   dy: speed,
 });
 
@@ -24,7 +29,7 @@ var loop = kontra.gameLoop({
   update() {
     sprite.update();
 
-    var bottom = sprite.y + 20 > kontra.canvas.height;
+    var bottom = sprite.y + carHeight > kontra.canvas.height;
     if (bottom) {
       sprite.dy = speed*-1;
       direction = 'up';
@@ -46,7 +51,7 @@ var loop = kontra.gameLoop({
     }
     else if (y === 20){
       currentFloor = 2;
-    } 
+    }
     else if (y === 0){
       currentFloor = 3;
     }
