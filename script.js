@@ -18,9 +18,10 @@ var stopAtFloor = -3;
 
 var car1 = createCar();
 
+var floors = createFloors(numberOfFloors);
 
-var floor = createFloor(2);
-
+var people = createPeople();
+  
 var loop = kontra.gameLoop({
   update() {
     car1.update();
@@ -55,7 +56,14 @@ var loop = kontra.gameLoop({
     statusElement.innerHTML = status;
   },
   render() {
-    floor.render();
+    floors.forEach(function(floor) {
+      floor.render();
+    });
+    
+    people.forEach(function(person) {
+      person.render();
+    });
+    
     car1.render();
   }
 });
@@ -66,25 +74,57 @@ function createCar() {
   return kontra.sprite({
     x: 0,
     y: numberOfFloors * carHeight,
-    color: 'lightgray',
+    color: 'gray',
     width: carWidth,
     height: carHeight,
     dy: speed,
   });
 }
 
-function createFloor(floorNr) {
-  
-  var color = 'white';
-  if (floorNr % 2 === 0) {
-    color = 'lightgray';
+function createFloors(numberOfFloors) {
+  var floors = [];
+  for (var i = 0; i <= numberOfFloors; i++) {  
+    var floor = createFloor(i);
+    floors.push(floor);
   }
+  return floors;
+}
+
+function createFloor(floorIndex) {
+  
+  var color = 'silver';
+  if (floorIndex % 2 === 0) {
+    color = 'gainsboro';
+  }
+  
+  var y = floorIndex * carHeight;
   
   return kontra.sprite({
     x: 0,
-    y: 0,
+    y: y,
     color: color,
     width: canvasWidth,
     height: carHeight
+  });
+}
+
+function createPeople() {
+  var people = [];
+  
+  people.push(createPerson());
+  
+  return people;
+}
+
+function createPerson() {
+  
+  var color = 'red';
+
+  return kontra.sprite({
+    x: carWidth,
+    y: 10,
+    color: color,
+    width: carWidth/3,
+    height: carHeight/3  
   });
 }
