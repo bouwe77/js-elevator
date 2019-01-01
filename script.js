@@ -21,54 +21,72 @@ var car1 = createCar();
 var floors = createFloors(numberOfFloors);
 
 var people = createPeople();
-  
+
 var loop = kontra.gameLoop({
   update() {
+    // Update all animated sprites.
     car1.update();
+    //...
 
-    var bottom = car1.y + carHeight > kontra.canvas.height;
-    if (bottom) {
-      car1.dy = speed*-1;
-      direction = 'up';
-    } 
-    else {
-      var top = car1.y < 0;
-      if (top) {
-        car1.dy = speed;
-        direction = 'down';
-      }
-    }
-    
-    var y = Math.round(car1.y);
-
-    if (y % carHeight === 0) {
-      currentFloor = (y/carHeight - numberOfFloors) * -1;
-    }
-    
-    if (currentFloor === stopAtFloor) {
-      car1.dy = 0;
-    }
-    
-    var status = "Floor: " + currentFloor + "<br/>";
-    status += "Direction: " + direction + "<br/>";
-    status += "Y: " + y;
-    var statusElement = document.getElementById("status");
-    statusElement.innerHTML = status;
+    resetDirection();
+    updateCurrentFloor();
+    updateControlPanel();
   },
   render() {
-    floors.forEach(function(floor) {
-      floor.render();
-    });
-    
-    people.forEach(function(person) {
-      person.render();
-    });
-    
-    car1.render();
+    render();
   }
 });
 
 loop.start();
+
+function render() {
+  floors.forEach(function(floor) {
+    floor.render();
+  });
+
+  people.forEach(function(person) {
+    person.render();
+  });
+
+  car1.render();
+}
+
+function resetDirection() {
+  var bottom = car1.y + carHeight > kontra.canvas.height;
+  if (bottom) {
+    car1.dy = speed*-1;
+    direction = 'up';
+  } 
+  else {
+    var top = car1.y < 0;
+    if (top) {
+      car1.dy = speed;
+      direction = 'down';
+    }
+  }
+}
+
+function updateCurrentFloor() {
+  var y = Math.round(car1.y);
+
+  if (y % carHeight === 0) {
+    currentFloor = (y/carHeight - numberOfFloors) * -1;
+  }
+
+  if (currentFloor === stopAtFloor) {
+    stopElevator();
+  }
+}
+
+function stopElevator() {
+  car1.dy = 0;  
+}
+
+function updateControlPanel() {
+  var status = "Floor: " + currentFloor + "<br/>";
+  var statusElement = document.getElementById("status");
+  statusElement.innerHTML = status;
+}
 
 function createCar() {
   return kontra.sprite({
@@ -91,14 +109,14 @@ function createFloors(numberOfFloors) {
 }
 
 function createFloor(floorIndex) {
-  
+
   var color = 'silver';
   if (floorIndex % 2 === 0) {
     color = 'gainsboro';
   }
-  
+
   var y = floorIndex * carHeight;
-  
+
   return kontra.sprite({
     x: 0,
     y: y,
@@ -110,7 +128,7 @@ function createFloor(floorIndex) {
 
 function createPeople() {
   var people = [];
-  
+
   people.push(createPerson(4));
   people.push(createPerson(4));
   people.push(createPerson(4));
@@ -122,16 +140,16 @@ function createPeople() {
   people.push(createPerson(1));
   people.push(createPerson(1));
   people.push(createPerson(0));
-  
+
   return people;
 }
 
 function createPerson(floor) {
-  
+
   var color = 'red';
 
   var y = getPersonPositionForFloor(floor);
-  
+
   return kontra.sprite({
     x: getRandomNumber(carWidth, canvasWidth-carWidth),
     y: y,
@@ -163,7 +181,7 @@ function getPersonPositionForFloor(floor) {
  * Returns a random integer between min (inclusive) and max (inclusive).
  */
 function getRandomNumber(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
