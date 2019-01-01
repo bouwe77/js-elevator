@@ -6,7 +6,8 @@ var carWidth = 20;
 var carHeight = 20;
 var canvasWidth = 200;
 var canvasHeight = (numberOfFloors * carHeight) + carHeight;
-
+var personWidth = carWidth/3;
+var personHeight = carHeight/3;
 kontra.init();
 kontra.canvas.width = canvasWidth;
 kontra.canvas.height = canvasHeight;
@@ -134,10 +135,6 @@ function createPeople() {
   var people = [];
 
   people.push(createPerson(0));
-  people.push(createPerson(0));
-  people.push(createPerson(0));
-  people.push(createPerson(0));
-  people.push(createPerson(0));
 
   return people;
 }
@@ -152,9 +149,10 @@ function createPerson(floor) {
     x: getRandomNumber(carWidth, canvasWidth-carWidth),
     y: y,
     color: color,
-    width: carWidth/3,
-    height: carHeight/3,
-    dx: speed
+    width: personWidth,
+    height: personHeight,
+    dx: speed * -1,
+    currentFloor: floor
   });
 }
 
@@ -181,29 +179,38 @@ function getPersonPositionForFloor(floor) {
 }
 
 function movePeopleAround() {
+  
   people.forEach(function(person) {
     var x = Math.round(person.x);
 
-    // Stop moving the person if it is on the far left or right
+    var farRight = x > (canvasWidth - personWidth);
     var farLeft = x < carWidth;
-    var farRight = x > canvasWidth;
+
+    // Moving the person the other way if it is on the far right.
+    if (farRight) {
+      person.dx = speed * -1;
+    }
+
+    // Stop moving the person if it is on the far left.
     if (farLeft) {
       person.dx = 0;
-    }
-    else if (farLeft) {
-      if (farRight) {
-        person.dx = 0;
-      }
-    }
+      requestElevator(person.currentFloor);
+    } 
     else {
-      var moveRight = Math.random() === 1;
-      if (moveRight) {
-        person.dx = speed;
-      } else {
-        person.dx = speed * -1;
-      }
+      // Randomly determine whether the person will move the other way.
+      // var moveTheOtherWay = getRandomNumber(1,30) === 3;
+      // if (moveTheOtherWay) {
+      //   person.dx = person.dx * -1;
+      // } 
     }
   });
+}
+
+function requestElevator(floor) {
+  if (stopAtFloor !== floor) {
+    stopAtFloor = floor;
+    console.log("Elevator requested on floor " + floor);
+  }
 }
                  
 /**
