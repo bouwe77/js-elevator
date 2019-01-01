@@ -111,20 +111,59 @@ function createFloor(floorIndex) {
 function createPeople() {
   var people = [];
   
-  people.push(createPerson());
+  people.push(createPerson(4));
+  people.push(createPerson(4));
+  people.push(createPerson(4));
+  people.push(createPerson(4));
+  people.push(createPerson(3));
+  people.push(createPerson(3));
+  people.push(createPerson(3));
+  people.push(createPerson(2));
+  people.push(createPerson(1));
+  people.push(createPerson(1));
+  people.push(createPerson(0));
   
   return people;
 }
 
-function createPerson() {
+function createPerson(floor) {
   
   var color = 'red';
 
+  var y = getPersonPositionForFloor(floor);
+  
   return kontra.sprite({
-    x: carWidth,
-    y: 10,
+    x: getRandomNumber(carWidth, canvasWidth-carWidth),
+    y: y,
     color: color,
     width: carWidth/3,
     height: carHeight/3  
   });
+}
+
+function getPersonPositionForFloor(floor) {
+  if (floor === 4) {
+    return 10;
+  }
+  if (floor === 3) {
+    return 30;
+  }
+  if (floor === 2) {
+    return 50;
+  }
+  if (floor === 1) {
+    return 70;
+  }
+  if (floor === 0) {
+    return 90;
+  }
+}
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ */
+function getRandomNumber(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

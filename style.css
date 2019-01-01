@@ -2,3 +2,19 @@
   background-color: white;
   border: 1px solid black;
 }
+
+#control-panel {
+  background-color: black;
+  width: 200px;
+  height: 200px;
+  text-align: center;
+  color: white;
+}
+
+#control-panel h5 {
+  margin: 0;
+}
+
+#status {
+  text-align: left;
+}
