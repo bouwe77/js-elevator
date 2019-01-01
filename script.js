@@ -26,11 +26,15 @@ var loop = kontra.gameLoop({
   update() {
     // Update all animated sprites.
     car1.update();
-    //...
+
+    people.forEach(function(person) {
+      person.update();
+    });  
 
     resetDirection();
     updateCurrentFloor();
     updateControlPanel();
+    movePeopleAround();
   },
   render() {
     render();
@@ -129,16 +133,10 @@ function createFloor(floorIndex) {
 function createPeople() {
   var people = [];
 
-  people.push(createPerson(4));
-  people.push(createPerson(4));
-  people.push(createPerson(4));
-  people.push(createPerson(4));
-  people.push(createPerson(3));
-  people.push(createPerson(3));
-  people.push(createPerson(3));
-  people.push(createPerson(2));
-  people.push(createPerson(1));
-  people.push(createPerson(1));
+  people.push(createPerson(0));
+  people.push(createPerson(0));
+  people.push(createPerson(0));
+  people.push(createPerson(0));
   people.push(createPerson(0));
 
   return people;
@@ -155,11 +153,16 @@ function createPerson(floor) {
     y: y,
     color: color,
     width: carWidth/3,
-    height: carHeight/3  
+    height: carHeight/3,
+    dx: speed
   });
 }
 
+
 function getPersonPositionForFloor(floor) {
+  
+  //TODO Refactor this
+  
   if (floor === 4) {
     return 10;
   }
@@ -177,6 +180,32 @@ function getPersonPositionForFloor(floor) {
   }
 }
 
+function movePeopleAround() {
+  people.forEach(function(person) {
+    var x = Math.round(person.x);
+
+    // Stop moving the person if it is on the far left or right
+    var farLeft = x < carWidth;
+    var farRight = x > canvasWidth;
+    if (farLeft) {
+      person.dx = 0;
+    }
+    else if (farLeft) {
+      if (farRight) {
+        person.dx = 0;
+      }
+    }
+    else {
+      var moveRight = Math.random() === 1;
+      if (moveRight) {
+        person.dx = speed;
+      } else {
+        person.dx = speed * -1;
+      }
+    }
+  });
+}
+                 
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
  */
