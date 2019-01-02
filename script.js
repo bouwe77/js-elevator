@@ -1,6 +1,6 @@
 // === Config ===
 // Speed = The number of pixels to move the sprite up/down every frame
-var elevatorSpeed = 1;
+var elevatorSpeed = 0.2;
 var peopleMovingSpeed = 0.2;
 var numberOfFloors = 4;
 var carWidth = 20;
@@ -63,7 +63,7 @@ function updateAnimatedSprites() {
 }
 
 function handleArrivingAtDesignatedFloor() {
-  if (car1.moving && car1.currentFloor === car1.nextStopAtFloor) {
+  if (car1.currentFloor === car1.nextStopAtFloor && car1.doorsOpen) {
     stopElevator();
     letPeopleEnterElevator();
   }
@@ -89,6 +89,9 @@ function updateCurrentFloor() {
 
   if (y % carHeight === 0) {
     car1.currentFloor = (y/carHeight - numberOfFloors) * -1;
+    openDoors();
+  } else {
+    closeDoors();
   }
 }
 
@@ -132,7 +135,8 @@ function createCar() {
     nextStopAtFloor: null,
     moving: false,
     capacity: 2,
-    currentNumberOfPeople: 0
+    currentNumberOfPeople: 0,
+    doorsOpen: false
   });
 }
 
@@ -198,7 +202,7 @@ function createPerson(floor) {
 
     // Custom Person properties
     currentFloor: floor,
-    elevatorRequested: false,
+    elevatorRequestedTimestamp: null,
     onElevator: false
   });
 }
@@ -238,7 +242,7 @@ function movePeopleAround() {
     }
 
     // If the person is on the far left, stop moving and request an elevator.
-    if (farLeft && !person.elevatorRequested && !person.onElevator) {
+    if (farLeft && person.elevatorRequestedTimestamp === null && !person.onElevator) {
       person.dx = 0;
       requestElevator(person);
     }
@@ -250,16 +254,25 @@ function movePeopleAround() {
       // } 
     }
   });
+  
+  // Arrange people that are waiting for an elevator, so they are all visible.
+     for (var floor = 0; floor <= numberOfFloors; floor++) {  
+       var peopleWaitingForElevator = people
+       .filter(person => 
+               person.currentFloor == floor 
+               && person.elevatorRequestedTimestamp !== null);
+       displayPeopleGroup(peopleWaitingForElevator, carWidth);
+     }
 }
 
 function requestElevator(person) {
   
   consolelog('requesting elevator...');
   
-  if (person.elevatorRequested)
+  if (person.elevatorRequestedTimestamp !== null)
     return;
   
-  person.elevatorRequested = true;
+  person.elevatorRequestedTimestamp = new Date().getTime();
 
   var requestedFloor = person.currentFloor;
 
@@ -295,7 +308,7 @@ function letPeopleEnterElevator() {
   
   var peopleWaitingForElevator = people
   .filter(person => 
-          person.elevatorRequested
+          person.elevatorRequestedTimestamp !== null
           && person.currentFloor === car1.currentFloor);
   var anyPeopleWaiting = peopleWaitingForElevator.length !== 0;
   
@@ -310,16 +323,39 @@ function letPeopleEnterElevator() {
   peopleWaitingForElevator.forEach(function(person) {
     enterElevator(person);
   });
+  
+  var peopleOnElevator = people.filter(person => person.onElevator);
+  displayPeopleGroup(peopleOnElevator, 0);
+  
+  closeDoors();
 }
 
 function enterElevator(person) {
   consolelog("entering elevator...")
   person.onElevator = true;
-  person.elevatorRequested = false;
-  person.x = car1.currentNumberOfPeople * 10;
+  person.elevatorRequestedTimestamp = null;
 
   car1.currentNumberOfPeople++;
 }
+
+/**
+ * Displays multiple people next to each other.
+ */
+function displayPeopleGroup(people, startX) {
+  people.forEach(function(person) {
+    person.x = startX;
+    startX += 8;
+  });
+}
+
+function openDoors() {
+  car1.doorsOpen = true;
+}
+
+function closeDoors() {
+  car1.doorsOpen = false;
+}
+
 
 
 
