@@ -12,11 +12,6 @@ kontra.init();
 kontra.canvas.width = canvasWidth;
 kontra.canvas.height = canvasHeight;
 
-// === State ===
-var currentFloor = 0;
-var direction = 'up';
-var stopAtFloor = -3;
-
 var car1 = createCar();
 
 var floors = createFloors(numberOfFloors);
@@ -25,26 +20,23 @@ var people = createPeople();
 
 var loop = kontra.gameLoop({
   update() {
-    // Update all animated sprites.
-    car1.update();
-
-    people.forEach(function(person) {
-      person.update();
-    });  
-
+    updateAnimatedSprites();
+    
     resetDirection();
     updateCurrentFloor();
     updateControlPanel();
     movePeopleAround();
+    stopElevatorWhenArrived();
+    letPeopleEnterElevator();
   },
   render() {
-    render();
+    renderAnimatedSprites();
   }
 });
 
 loop.start();
 
-function render() {
+function renderAnimatedSprites() {
   floors.forEach(function(floor) {
     floor.render();
   });
@@ -56,17 +48,30 @@ function render() {
   car1.render();
 }
 
+function updateAnimatedSprites() {
+  car1.update();
+  people.forEach(function(person) {
+    person.update();
+  });  
+}
+
+function stopElevatorWhenArrived() {
+  if (car1.currentFloor === car1.stopAtFloor) {
+    stopElevator();
+  }
+}
+
 function resetDirection() {
   var bottom = car1.y + carHeight > kontra.canvas.height;
   if (bottom) {
     car1.dy = speed*-1;
-    direction = 'up';
+    car1.direction = 'up';
   } 
   else {
     var top = car1.y < 0;
     if (top) {
       car1.dy = speed;
-      direction = 'down';
+      car1.direction = 'down';
     }
   }
 }
@@ -75,20 +80,17 @@ function updateCurrentFloor() {
   var y = Math.round(car1.y);
 
   if (y % carHeight === 0) {
-    currentFloor = (y/carHeight - numberOfFloors) * -1;
-  }
-
-  if (currentFloor === stopAtFloor) {
-    stopElevator();
+    car1.currentFloor = (y/carHeight - numberOfFloors) * -1;
   }
 }
 
 function stopElevator() {
-  car1.dy = 0;  
+  car1.dy = 0;
+  car1.moving = false;
 }
 
 function updateControlPanel() {
-  var status = "Floor: " + currentFloor + "<br/>";
+  var status = "Floor: " + car1.currentFloor + "<br/>";
   var statusElement = document.getElementById("status");
   statusElement.innerHTML = status;
 }
@@ -101,6 +103,12 @@ function createCar() {
     width: carWidth,
     height: carHeight,
     dy: speed,
+
+    // Custom Car properties
+    currentFloor: 0,
+    direction: 'up',
+    stopAtFloor: -1,
+    moving: true
   });
 }
 
@@ -152,15 +160,17 @@ function createPerson(floor) {
     width: personWidth,
     height: personHeight,
     dx: speed * -1,
-    currentFloor: floor
+
+    // Custom Person properties
+    currentFloor: floor,
+    elevatorRequested: false
   });
 }
 
-
 function getPersonPositionForFloor(floor) {
-  
+
   //TODO Refactor this
-  
+
   if (floor === 4) {
     return 10;
   }
@@ -179,7 +189,7 @@ function getPersonPositionForFloor(floor) {
 }
 
 function movePeopleAround() {
-  
+
   people.forEach(function(person) {
     var x = Math.round(person.x);
 
@@ -191,10 +201,10 @@ function movePeopleAround() {
       person.dx = speed * -1;
     }
 
-    // Stop moving the person if it is on the far left.
+    // If the person is on the far left, stop moving and request an elevator.
     if (farLeft) {
       person.dx = 0;
-      requestElevator(person.currentFloor);
+      requestElevator(person);
     } 
     else {
       // Randomly determine whether the person will move the other way.
@@ -206,13 +216,35 @@ function movePeopleAround() {
   });
 }
 
-function requestElevator(floor) {
-  if (stopAtFloor !== floor) {
-    stopAtFloor = floor;
-    console.log("Elevator requested on floor " + floor);
+function requestElevator(person) {
+  person.elevatorRequested = true;
+  if (car1.stopAtFloor !== person.currentFloor) {
+    car1.stopAtFloor = person.currentFloor;
+    //console.log("Elevator requested on floor " + person.currentFloor);
   }
 }
-                 
+
+function letPeopleEnterElevator() {
+  if (car1.moving === false) {
+    var peopleWantingToEnterElevator = people
+    .filter(person => 
+            person.elevatorRequested
+            && person.currentFloor === car1.currentFloor);
+    
+    console.log(peopleWantingToEnterElevator)
+    
+    peopleWantingToEnterElevator.forEach(function(person) {
+      enterElevator(person);
+    });
+  }
+}
+
+function enterElevator(person) {
+  console.log("entering elevator...");
+  person.elevatorRequested = false;
+  person.x = person.x -10;
+}
+
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
  */
