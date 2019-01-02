@@ -19,6 +19,8 @@ var floors = createFloors(numberOfFloors);
 
 var people = createPeople();
 
+document.write('<h1>TODO<ul><li>Let person choose floor + register this</li><li>Get the elevator moving again, in the right direction</li></ul></h1>')
+
 startElevator();
 
 var loop = kontra.gameLoop({
@@ -28,8 +30,7 @@ var loop = kontra.gameLoop({
     resetDirection();
     updateCurrentFloor();
     movePeopleAround();
-    stopElevatorWhenArrived();
-    letPeopleEnterElevator();
+    handleArrivingAtDesignatedFloor();
     updateControlPanel();
   },
   render() {
@@ -58,9 +59,10 @@ function updateAnimatedSprites() {
   });  
 }
 
-function stopElevatorWhenArrived() {
-  if (car1.currentFloor === car1.stopAtFloor) {
+function handleArrivingAtDesignatedFloor() {
+  if (car1.moving && car1.currentFloor === car1.stopAtFloor) {
     stopElevator();
+    letPeopleEnterElevator();
   }
 }
 
@@ -88,13 +90,17 @@ function updateCurrentFloor() {
 }
 
 function stopElevator() {
-  car1.dy = 0;
-  car1.moving = false;
+  if (car1.moving) {
+    car1.dy = 0;
+    car1.moving = false;
+  }
 }
 
 function startElevator() {
-  car1.dy = elevatorSpeed;
-  car1.moving = true;
+  if (!car1.moving) {
+    car1.dy = elevatorSpeed;
+    car1.moving = true;
+  }
 }
 
 function updateControlPanel() {
@@ -118,8 +124,7 @@ function createCar() {
     stopAtFloor: -1,
     moving: false,
     capacity: 2,
-    currentNumberOfPeople: 0,
-    locked: false
+    currentNumberOfPeople: 0
   });
 }
 
@@ -237,16 +242,8 @@ function requestElevator(person) {
 }
 
 function letPeopleEnterElevator() {
-  
-  if (car1.locked)
+  if (car1.moving)
     return;
-  
-  car1.locked = true;
-  
-  if (car1.moving) {
-    car1.locked = false;
-    return;
-  }
   
   var peopleWaitingForElevator = people
   .filter(person => 
@@ -254,29 +251,24 @@ function letPeopleEnterElevator() {
           && person.currentFloor === car1.currentFloor);
   var anyPeopleWaiting = peopleWaitingForElevator.length !== 0;
   
-  if (!anyPeopleWaiting) {
-    car1.locked = false;
+  if (!anyPeopleWaiting)
     return;
-  }
   
   var howManyPeopleCanEnter = car1.capacity - car1.currentNumberOfPeople;
   if (howManyPeopleCanEnter === 0) {
     //consolelog("No people can enter: " + car1.capacity + " - " + car1.currentNumberOfPeople)
-    car1.locked = false;
     return;
   }
   
-  //consolelog('Car has stopped, people are waiting and there is room');
+  consolelog('Car has stopped, people are waiting and there is room');
   
   peopleWaitingForElevator.forEach(function(person) {
     enterElevator(person);
   });
-  
-  car1.locked = false;
 }
 
 function enterElevator(person) {
-  //consolelog("entering elevator...")
+  consolelog("entering elevator...")
   person.elevatorRequested = false;
   //person.x = car1.currentNumberOfPeople * 10;
   //consolelog(person.x);
