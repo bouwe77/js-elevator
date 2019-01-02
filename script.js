@@ -9,36 +9,39 @@ var canvasWidth = 200;
 var canvasHeight = (numberOfFloors * carHeight) + carHeight;
 var personWidth = carWidth/3;
 var personHeight = carHeight/3;
-kontra.init();
-kontra.canvas.width = canvasWidth;
-kontra.canvas.height = canvasHeight;
+var car1, floors, people;
 
-var car1 = createCar();
+start();
 
-var floors = createFloors(numberOfFloors);
+function start() {
 
-var people = createPeople();
+  kontra.init();
+  kontra.canvas.width = canvasWidth;
+  kontra.canvas.height = canvasHeight;
 
-document.write('<h1>TODO<ul><li>Let person choose floor + register this</li><li>Get the elevator moving again, in the right direction</li></ul></h1>')
+  car1 = createCar();
+  floors = createFloors(numberOfFloors);
+  people = createPeople();
 
-startElevator();
+  startElevator();
 
-var loop = kontra.gameLoop({
-  update() {
-    updateAnimatedSprites();
-    
-    resetDirection();
-    updateCurrentFloor();
-    movePeopleAround();
-    handleArrivingAtDesignatedFloor();
-    updateControlPanel();
-  },
-  render() {
-    renderAnimatedSprites();
-  }
-});
+  var loop = kontra.gameLoop({
+    update() {
+      updateAnimatedSprites();
 
-loop.start();
+      resetDirection();
+      updateCurrentFloor();
+      handleArrivingAtDesignatedFloor();
+      movePeopleAround();
+      updateControlPanel();
+    },
+    render() {
+      renderAnimatedSprites();
+    }
+  });
+
+  loop.start();  
+}
 
 function renderAnimatedSprites() {
   floors.forEach(function(floor) {
@@ -164,6 +167,7 @@ function createPeople() {
   var people = [];
 
   people.push(createPerson(0));
+  people.push(createPerson(0));
 
   // Create a random number of people on each floor.
   // for (var floor = 0; floor <= numberOfFloors; floor++) {  
@@ -180,8 +184,8 @@ function createPerson(floor) {
 
   var color = getRandomColor();
 
-  var x = getRandomNumber(carWidth, canvasWidth-carWidth);
-  x = 40;
+  //var x = getRandomNumber(carWidth, canvasWidth-carWidth);
+  var x = getRandomNumber(carWidth, 80);
   var y = getPersonPositionForFloor(floor);
 
   return kontra.sprite({
@@ -194,7 +198,8 @@ function createPerson(floor) {
 
     // Custom Person properties
     currentFloor: floor,
-    elevatorRequested: false
+    elevatorRequested: false,
+    onElevator: false
   });
 }
 
@@ -233,7 +238,7 @@ function movePeopleAround() {
     }
 
     // If the person is on the far left, stop moving and request an elevator.
-    if (farLeft && !person.elevatorRequested) {
+    if (farLeft && !person.elevatorRequested && !person.onElevator) {
       person.dx = 0;
       requestElevator(person);
     }
@@ -247,14 +252,12 @@ function movePeopleAround() {
   });
 }
 
-
 function requestElevator(person) {
   
-  //====== DEZE KAN WEG!!! =======
-  return;
-  //==============================
-
-  consolelog('requesting...');
+  consolelog('requesting elevator...');
+  
+  if (person.elevatorRequested)
+    return;
   
   person.elevatorRequested = true;
 
@@ -301,12 +304,9 @@ function letPeopleEnterElevator() {
   
   var howManyPeopleCanEnter = car1.capacity - car1.currentNumberOfPeople;
   if (howManyPeopleCanEnter === 0) {
-    //consolelog("No people can enter: " + car1.capacity + " - " + car1.currentNumberOfPeople)
     return;
   }
-  
-  consolelog('Car has stopped, people are waiting and there is room');
-  
+
   peopleWaitingForElevator.forEach(function(person) {
     enterElevator(person);
   });
@@ -314,14 +314,18 @@ function letPeopleEnterElevator() {
 
 function enterElevator(person) {
   consolelog("entering elevator...")
+  person.onElevator = true;
   person.elevatorRequested = false;
-  //person.x = car1.currentNumberOfPeople * 10;
-  //consolelog(person.x);
+  person.x = car1.currentNumberOfPeople * 10;
 
-  person.x = 0;
-
-  car1.currentNumberOfPeople = 1;
+  car1.currentNumberOfPeople++;
 }
+
+
+
+
+
+
 
 // ================ UTILITIES ========================================================
 
