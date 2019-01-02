@@ -34,6 +34,7 @@ function start() {
       handleArrivingAtDesignatedFloor();
       movePeopleAround();
       updateControlPanel();
+      displayPeople();
     },
     render() {
       renderAnimatedSprites();
@@ -111,12 +112,22 @@ function startElevator() {
 
 function updateControlPanel() {
   var status = "Current floor: " + car1.currentFloor + "<br/>";
-  status += "Peeps on board: " + car1.currentNumberOfPeople + "<br/>";
+  status += "People in elevator: " + car1.currentNumberOfPeople + "<br/>";
   status += "Requested UP: " + car1.requestedFloorsUp + "<br/>";
   status += "Requested DOWN: " + car1.requestedFloorsDown + "<br/>";
   
   var statusElement = document.getElementById("status");
   statusElement.innerHTML = status;
+}
+
+function displayPeople() {
+  var peopleDetails = '';
+  people.forEach(function(person) {
+    peopleDetails += person.currentFloor + ": " + person.name + "<br/>";
+  }); 
+
+  var peopleElement = document.getElementById("people-details");
+  peopleElement.innerHTML = peopleDetails;
 }
 
 function createCar() {
@@ -187,7 +198,7 @@ function createPeople() {
 function createPerson(floor) {
 
   var color = getRandomColor();
-
+  var name = getRandomName();
   //var x = getRandomNumber(carWidth, canvasWidth-carWidth);
   var x = getRandomNumber(carWidth, 80);
   var y = getPersonPositionForFloor(floor);
@@ -201,6 +212,7 @@ function createPerson(floor) {
     dx: peopleMovingSpeed * -1,
 
     // Custom Person properties
+    name: name,
     currentFloor: floor,
     elevatorRequestedTimestamp: null,
     onElevator: false
@@ -309,7 +321,8 @@ function letPeopleEnterElevator() {
   var peopleWaitingForElevator = people
   .filter(person => 
           person.elevatorRequestedTimestamp !== null
-          && person.currentFloor === car1.currentFloor);
+          && person.currentFloor === car1.currentFloor)
+  .sort(function (a, b) { return b.elevatorRequestedTimestamp - a.elevatorRequestedTimestamp; });
   var anyPeopleWaiting = peopleWaitingForElevator.length !== 0;
   
   if (!anyPeopleWaiting)
@@ -324,7 +337,9 @@ function letPeopleEnterElevator() {
     enterElevator(person);
   });
   
-  var peopleOnElevator = people.filter(person => person.onElevator);
+  var peopleOnElevator = people
+  .filter(person => person.onElevator)
+  .sort(function (a, b) { return b.elevatorRequestedTimestamp - a.elevatorRequestedTimestamp; });
   displayPeopleGroup(peopleOnElevator, 0);
   
   closeDoors();
@@ -336,6 +351,8 @@ function enterElevator(person) {
   person.elevatorRequestedTimestamp = null;
 
   car1.currentNumberOfPeople++;
+  
+  //TODO Choose floor here
 }
 
 /**
@@ -426,6 +443,11 @@ function getRandomColor() {
 "#f812b3", "#b17fc9", "#8d6c2f", "#d3277a", "#2ca1ae", "#9685eb", "#8a96c6",
 "#dba2e6", "#76fc1b", "#608fa4", "#20f6ba", "#07d7f6", "#dce77a", "#77ecca"];
   return colors[Math.floor(Math.random()*colors.length)];
+}
+
+function getRandomName() {
+  var names = ["Jacob","Michael","Matthew","Joshua","Christopher","Nicholas","Andrew","Joseph","Daniel","Tyler","William","Brandon","Ryan","John","Zachary","David","Anthony","James","Justin","Alexander","Jonathan","Christian","Austin","Dylan","Ethan","Benjamin","Noah","Samuel","Robert","Nathan","Cameron","Kevin","Thomas","Jose","Hunter","Jordan","Kyle","Caleb","Jason","Logan","Aaron","Eric","Brian","Gabriel","Adam","Jack","Isaiah","Juan","Luis","Connor","Emily","Hannah","Madison","Ashley","Sarah","Alexis","Samantha","Jessica","Elizabeth","Taylor","Lauren","Alyssa","Kayla","Abigail","Brianna","Olivia","Emma","Megan","Grace","Victoria","Rachel","Anna","Sydney","Destiny","Morgan","Jennifer","Jasmine","Haley","Julia","Kaitlyn","Nicole","Amanda","Katherine","Natalie","Hailey","Alexandra","Savannah","Chloe","Rebecca","Stephanie","Maria","Sophia","Mackenzie","Allison","Isabella","Amber","Mary","Danielle","Gabrielle","Jordan"];
+  return names[Math.floor(Math.random()*names.length)];
 }
 
 // ===================================================================================

@@ -3,18 +3,19 @@
   border: 1px solid black;
 }
 
-#control-panel {
+#control-panel, #people {
   background-color: black;
   width: 200px;
-  height: 200px;
+  height: 120px;
   text-align: center;
   color: white;
+  margin-bottom: 5px;
 }
 
-#control-panel h5 {
+h5 {
   margin: 0;
 }
 
-#status {
+#status, #people-details {
   text-align: left;
 }
