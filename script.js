@@ -29,7 +29,7 @@ var loop = kontra.gameLoop({
     updateCurrentFloor();
     movePeopleAround();
     stopElevatorWhenArrived();
-    //letPeopleEnterElevator();
+    letPeopleEnterElevator();
     updateControlPanel();
   },
   render() {
@@ -172,7 +172,7 @@ function createPerson(floor) {
     color: color,
     width: personWidth,
     height: personHeight,
-    dx: personMovingSpeed * -1,
+    dx: peopleMovingSpeed * -1,
 
     // Custom Person properties
     currentFloor: floor,
@@ -266,7 +266,7 @@ function letPeopleEnterElevator() {
     return;
   }
   
-  consolelog('Car has stopped, people are waiting and there is room');
+  //consolelog('Car has stopped, people are waiting and there is room');
   
   peopleWaitingForElevator.forEach(function(person) {
     enterElevator(person);
@@ -276,7 +276,7 @@ function letPeopleEnterElevator() {
 }
 
 function enterElevator(person) {
-  consolelog("entering elevator...")
+  //consolelog("entering elevator...")
   person.elevatorRequested = false;
   //person.x = car1.currentNumberOfPeople * 10;
   //consolelog(person.x);
