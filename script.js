@@ -60,7 +60,7 @@ function updateAnimatedSprites() {
 }
 
 function handleArrivingAtDesignatedFloor() {
-  if (car1.moving && car1.currentFloor === car1.stopAtFloor) {
+  if (car1.moving && car1.currentFloor === car1.nextStopAtFloor) {
     stopElevator();
     letPeopleEnterElevator();
   }
@@ -104,8 +104,11 @@ function startElevator() {
 }
 
 function updateControlPanel() {
-  var status = "Floor: " + car1.currentFloor + "<br/>";
-  status += "# peeps: " + car1.currentNumberOfPeople;
+  var status = "Current floor: " + car1.currentFloor + "<br/>";
+  status += "Peeps on board: " + car1.currentNumberOfPeople + "<br/>";
+  status += "Requested UP: " + car1.requestedFloorsUp + "<br/>";
+  status += "Requested DOWN: " + car1.requestedFloorsDown + "<br/>";
+  
   var statusElement = document.getElementById("status");
   statusElement.innerHTML = status;
 }
@@ -120,8 +123,10 @@ function createCar() {
 
     // Custom Car properties
     currentFloor: 0,
-    direction: 'up',
-    stopAtFloor: -1,
+    direction: null,
+    requestedFloorsUp: [],
+    requestedFloorsDown: [],
+    nextStopAtFloor: null,
     moving: false,
     capacity: 2,
     currentNumberOfPeople: 0
@@ -235,9 +240,34 @@ function movePeopleAround() {
 }
 
 function requestElevator(person) {
+  
+  //====== DEZE KAN WEG!!! =======
+  //return;
+  //==============================
+
   person.elevatorRequested = true;
-  if (car1.stopAtFloor !== person.currentFloor) {
-    car1.stopAtFloor = person.currentFloor;
+
+  var requestedFloor = person.currentFloor;
+
+  if (car1.direction === 'up' && car1.requestedFloorsUp.indexOf(requestedFloor) === -1) {
+    // Add floor to requests.
+    car1.requestedFloorsUp.push(requestedFloor);
+
+    // Sort descending.
+    car1.requestedFloorsUp = car1.requestedFloorsUp.sort(function (a, b) {  return b - a;  });
+
+    // Determine next stop.
+    car1.nextStopAtFloor = car1.requestedFloorsUp[0];
+  } 
+  else if (car1.direction === 'down' && car1.requestedFloorsUp.indexOf(requestedFloor) === -1) {
+    // Add floor to requests.
+    car1.requestedFloorsDown.push(requestedFloor);
+
+    // Sort ascending.
+    car1.requestedFloorsDown = car1.requestedFloorsDown.sort(function (a, b) {  return a - b;  });
+
+    // Determine next stop.
+    car1.nextStopAtFloor = car1.requestedFloorsDown[0];
   }
 }
 
@@ -297,4 +327,5 @@ function getCurrentTime() {
 function consolelog(message) {
   console.log(getCurrentTime() + " - " + message);
 }
+
 // ===================================================================================
