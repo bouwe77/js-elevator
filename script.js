@@ -1,6 +1,6 @@
 // === Config ===
 // Speed = The number of pixels to move the sprite up/down every frame
-var elevatorSpeed = 0.2;
+var elevatorSpeed = 1;
 var peopleMovingSpeed = 0.2;
 var numberOfFloors = 4;
 var carWidth = 20;
@@ -361,7 +361,7 @@ function enterElevator(person) {
 function displayPeopleGroup(people, startX) {
   people.forEach(function(person) {
     person.x = startX;
-    startX += 8;
+    startX += personWidth + 2;
   });
 }
 
