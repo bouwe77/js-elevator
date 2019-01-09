@@ -28,7 +28,7 @@ function start() {
 
   var loop = kontra.gameLoop({
     update() {
-      updateAnimatedSprites();
+      updateAllSprites();
 
       resetDirection();
       updateCurrentFloor();
@@ -38,14 +38,14 @@ function start() {
       displayPeople();
     },
     render() {
-      renderAnimatedSprites();
+      renderAllSprites();
     }
   });
 
   loop.start();  
 }
 
-function renderAnimatedSprites() {
+function renderAllSprites() {
   floors.forEach(function(floor) {
     floor.render();
   });
@@ -57,7 +57,7 @@ function renderAnimatedSprites() {
   });
 }
 
-function updateAnimatedSprites() {
+function updateAllSprites() {
   car1.update();
   people.forEach(function(person) {
     person.update();
@@ -184,7 +184,8 @@ function createPeople() {
   people.push(createPerson(0));
 
   // Create a random number of people on each floor.
-  // for (var floor = 0; floor <= numberOfFloors; floor++) {  
+  // for (var floor = 0; floor <= numberOfFloors; floor++) { 
+  //   consolelog(floor);
   //   var howManyPeople = getRandomNumber(0, 5);
   //   for (var i = 0; i < howManyPeople; i++) {
   //     people.push(createPerson(floor));
